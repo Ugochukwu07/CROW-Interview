@@ -4,7 +4,7 @@ import java.util.Date;
 
 public class EmployeeLeaveApplyRequest {
     public String employeeId;
-    public String leaveDays;
+    public Integer leaveDays;
 
     public Date starDate;
     public Date enDate;

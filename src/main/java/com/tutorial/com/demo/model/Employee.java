@@ -32,5 +32,9 @@ public class Employee {
         return department;
     }
 
+    public Integer getMaxAnnualLeaveDays() {
+        return MaxAnnualLeaveDays;
+    }
+
 
 }

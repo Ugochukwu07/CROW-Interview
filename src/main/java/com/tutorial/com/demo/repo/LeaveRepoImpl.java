@@ -7,15 +7,19 @@ import com.tutorial.com.demo.model.Leave;
 
 public class LeaveRepoImpl implements ILeave {
 
+    private static Date daysFromNow(int days) {
+        return Date.from(java.time.Instant.now().plus(days, java.time.temporal.ChronoUnit.DAYS));
+    }
+
     public List<Leave> leaves = List.of(
-        new Leave("1", "1", 5),
-        new Leave("2", "3", 2),
-        new Leave("3", "2", 3)
+        new Leave("1", "1", 5, new Date(), daysFromNow(5)),
+        new Leave("2", "3", 2, new Date(), daysFromNow(2)),
+        new Leave("3", "2", 3, new Date(), daysFromNow(3))
     );
 
-    public Leave createLeave(String employeeId, Integer leaveDays) {
+    public Leave createLeave(String employeeId, Integer leaveDays, Date startDate, Date enDate) {
         String id = String.valueOf(leaves.size() + 1);
-        return new Leave(id, employeeId, leaveDays);
+        return new Leave(id, employeeId, leaveDays, startDate, enDate);
     }
 
     public List<Leave> getAllLeaves() {
@@ -36,11 +40,11 @@ public class LeaveRepoImpl implements ILeave {
             .toList();
     }
 
-    public Leave apporveRejectLeave(String id, boolean decision, String rejectReason, Date starDate, Date enDate){
+    public Leave apporveRejectLeave(String id, boolean decision, String rejectReason){
         var leave = this.findLeaveByLeaveId(id);
-        if(leave.id == null) throw new Exception("No Leave found");
+        if(leave == null) throw new IllegalArgumentException("No Leave found");
 
-        return leave.apporveRejectLeave(decision, rejectReason, starDate, enDate);
+        return leave.apporveRejectLeave(decision, rejectReason);
     }
     
 }

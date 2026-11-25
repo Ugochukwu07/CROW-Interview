@@ -6,7 +6,7 @@ import com.tutorial.com.demo.model.Leave;
 
 
 public interface ILeave {
-    public Leave createLeave(String employeeId, String leaveDays);
+    public Leave createLeave(String employeeId, Integer leaveDays, java.util.Date startDate, java.util.Date enDate);
 
     public List<Leave> getAllLeaves();
 

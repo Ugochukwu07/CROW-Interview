@@ -36,27 +36,31 @@ public class EmployeeLeaveController {
             return "Employee not found";
         }
 
-         //start date must be before end date
-        var dateCompared = employeeLeaveApplyRequest.starDate.compareTo(employeeLeaveApplyRequest.enDate);
-        if(dateCompared < 0) return "Start date must be before end date";
+        if(employeeLeaveApplyRequest.leaveDays == null || employeeLeaveApplyRequest.leaveDays <= 0) {
+            return "Leave days must be greater than zero";
+        }
 
-        //Leave requests cannot be submitted for dates in the past.
-        if(employeeLeaveApplyRequest.starDate.compareTo(new Date()) < 0) return "Leave requests cannot be submitted for dates in the past.";
+        // Leave starts today and ends today + leaveDays (so it can never be in the past).
+        var startDate = new Date();
+        var endDate = Date.from(startDate.toInstant().plus(employeeLeaveApplyRequest.leaveDays, java.time.temporal.ChronoUnit.DAYS));
 
         //An employee has a maximum of 20 annual leave days.
         var allLeaves = leaveRepo.findLeavesByEmployeeId(employeeLeaveApplyRequest.employeeId);
+
         var numLeavedaysTaken = 0;
-        for (Leave leave : allLeaves) {
-            numLeavedaysTaken += leave.leaveDays;
+        for (Leave existing : allLeaves) {
+            numLeavedaysTaken += existing.leaveDays;
         }
-        
-        // if(numLeavedaysTaken + employeeLeaveApplyRequest.leaveDays > employee.ma)
+
+        if (numLeavedaysTaken + employeeLeaveApplyRequest.leaveDays > employee.getMaxAnnualLeaveDays()) {
+            return "Leave request exceeds the maximum of " + employee.getMaxAnnualLeaveDays() + " annual leave days (" + numLeavedaysTaken + " already taken)";
+        }
 
         
 
 
 
-        var leave = leaveRepo.createLeave(employeeLeaveApplyRequest.employeeId, employeeLeaveApplyRequest.leaveDays);
+        var leave = leaveRepo.createLeave(employeeLeaveApplyRequest.employeeId, employeeLeaveApplyRequest.leaveDays, employeeLeaveApplyRequest.starDate, employeeLeaveApplyRequest.enDate);
 
         if(leave != null) {
             return "Leave request created successfully";
@@ -83,7 +87,7 @@ public class EmployeeLeaveController {
         }
         var approved = leaveDecisionRequest.decision == "APPROVED";
 
-        if(leave.apporveRejectLeave(approved, leaveDecisionRequest.reason, leaveDecisionRequest.starDate, leaveDecisionRequest.enDate) != null){
+        if(leave.apporveRejectLeave(approved, leaveDecisionRequest.reason) != null){
            return approved ? "Leave Approved" : "Leave Rejected";
         }
 
